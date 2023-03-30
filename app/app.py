@@ -9,6 +9,11 @@ from flask_jwt_extended import JWTManager
 from models.db import db
 from config import config_app
 
+# ToDo: remove this
+# Just to create the models in the DB
+from models.task import Task  # noqa
+from models.user import User  # noqa
+
 
 def create_app(env) -> Flask:
     app = Flask(__name__)
@@ -27,10 +32,11 @@ def create_app(env) -> Flask:
 
 
 def import_blueprints(app):
-    for file in os.listdir('app/routes'):
+    routes_path = os.listdir(os.path.dirname(os.path.abspath(__file__)).replace('\\', '/') + '/routes')
+    for file in routes_path:
         if file.endswith('route.py'):
             module_name = file[:-3]
-            module = importlib.import_module('api.routes.' + module_name)
+            module = importlib.import_module('routes.' + module_name)
             app.register_blueprint(module.blueprint)
 
 
