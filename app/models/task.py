@@ -10,5 +10,5 @@ class Task(db.Model):
     extension_to = db.Column(db.String(5))
     file_name = db.Column(db.String(50))
     timestamp = db.Column(db.DateTime(), default=db.func.now())
-    status = db.Column(SqlEnum(Status), default=Status.UPLOADED)
+    status = db.Column(SqlEnum(Status), default=Status.UPLOADED.value)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

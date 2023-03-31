@@ -1,10 +1,8 @@
-from common.exceptions import UserNotAuthorizedException
 from common.exceptions import CustomException
-from schemas.task_schema import TaskSchema
+from common.exceptions import UserNotAuthorizedException
 from common.utils import save_changes
-import os
-
 from models.task import Task
+from schemas.task_schema import TaskSchema
 
 
 # get all tasks of the authenticated user
@@ -17,20 +15,33 @@ def get_all_user_tasks(id_user):
 
 
 def create_task(id_user, request):
+    valid_formats = ['zip', '7z', 'tar.gz', 'tar.bz2']
     try:
         file = request.files['file']
         extension_to = request.form['new_format']
         extension_from = file.filename.split('.')[-1]
-        file_name= file.filename.split('.')[0]
-        task = Task(user_id=id_user, file_name=file_name,
-                    extension_from=extension_from, extension_to=extension_to)
+        file_name = file.filename.split('.')[0]
+
+        if not all([file, extension_to, extension_from, file_name]):
+            raise CustomException('All fields are required.', 400)
+        if extension_to.lower() not in valid_formats:
+            raise CustomException('Unsupported output format', 400)
+        if extension_from.lower() not in valid_formats:
+            raise CustomException('Unsupported input format', 400)
+        if extension_from.lower() == extension_to.lower():
+            raise CustomException('Input and output formats are the same', 400)
+
+        task = Task(user_id=id_user,
+                    file_name=file_name,
+                    extension_from=extension_from,
+                    extension_to=extension_to)
+
         save_changes(task)
-        file.save('static/files/uploaded/' +
-                  str(task.id) + '.' + extension_from)
+        file.save(f'static/files/uploaded/{task.id}.{extension_from}')
         task_schema = TaskSchema()
         return task_schema.dump(task)
     except Exception as e:
-        raise CustomException('Error to create task '+ str(e), 500)
+        raise CustomException('Error to create task ' + str(e), 500)
 
 
 def get_task_by_id(id_user, id_task):
@@ -51,5 +62,16 @@ def delete_task_by_id(id_user, id_task):
             raise CustomException('Task not found', 404)
         task.delete()
         return {'message': 'Task deleted successfully'}
+    except:
+        raise UserNotAuthorizedException()
+
+
+def update_task_status(id_task, status):
+    try:
+        task = Task.query.filter_by(id=id_task).first()
+        if task is None:
+            raise CustomException('Task not found', 404)
+        task.status = status
+        save_changes(task)
     except:
         raise UserNotAuthorizedException()

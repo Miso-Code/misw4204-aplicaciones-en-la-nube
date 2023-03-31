@@ -11,3 +11,5 @@ Flask-Cors==3.0.10
 flasgger~=0.9.5
 marshmallow==3.12.1
 marshmallow-sqlalchemy==0.25.0
+celery[redis]==5.2.7
+pylzma==0.5.0

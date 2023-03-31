@@ -4,9 +4,10 @@ from typing import Tuple, Dict, Any
 from flasgger import swag_from
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from services import task_service
 
+from celery_jobs import process_file
 from common.decorators import handle_exceptions
+from services import task_service
 
 blueprint = Blueprint('task_api', __name__, url_prefix='/api')
 
@@ -38,7 +39,9 @@ def get_all_user_tasks() -> Tuple[Dict[str, Any], int]:
 @handle_exceptions
 def create_task() -> Tuple[Dict[str, Any], int]:
     user_id = get_jwt_identity()
-    return task_service.create_task(user_id, request), HTTPStatus.CREATED
+    task_json = task_service.create_task(user_id, request)
+    process_file.delay(task_json)
+    return task_json, HTTPStatus.CREATED
 
 
 @blueprint.route('/tasks/<int:id_task>', methods=['GET'])
