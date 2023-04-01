@@ -14,11 +14,11 @@ class ResourceNotFoundException(Exception):
 
 
 class UserNotAuthorizedException(Exception):
-    def __init__(self, message):
+    def __init__(self, message="User not authorized"):
         super(UserNotAuthorizedException, self).__init__(message)
 
 
 class CustomException(Exception):
-    def __init__(self, message, status_code):
+    def __init__(self, message="Error", status_code=500):
         super(CustomException, self).__init__(message)
         self.status_code = status_code

@@ -23,5 +23,5 @@ blueprint = Blueprint('files_api', __name__, url_prefix='/api')
 @handle_exceptions
 def get_file_by_id() -> Tuple[Dict[str, Any], int]:
     file_id = int(request.args.get('id'))
-    selected = request.args.get('selected')
+    selected = request.args.get('selected', 'converted')
     return files_service.get_file_by_id(file_id, selected), HTTPStatus.OK
