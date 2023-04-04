@@ -12,8 +12,8 @@ celery = Celery(__name__)
 
 # Set up configuration settings
 celery.conf.update(
-    broker_url='redis://localhost:6379/0',
-    result_backend='redis://localhost:6379/0',
+    broker_url= os.environ.get('REDIS_URL'),
+    result_backend= os.environ.get('REDIS_URL'),
     task_track_started=True,
 )
 
