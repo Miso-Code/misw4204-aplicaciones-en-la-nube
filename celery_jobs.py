@@ -8,14 +8,7 @@ from celery import Celery
 from models.status import Status
 from services.task_service import update_task_status
 
-celery = Celery(__name__)
-
-# Set up configuration settings
-celery.conf.update(
-    broker_url= os.environ.get('REDIS_URL'),
-    result_backend= os.environ.get('REDIS_URL'),
-    task_track_started=True,
-)
+app = Celery('tasks', broker='redis://localhost:6379/0')
 
 
 def read_file(file_path):
@@ -28,7 +21,7 @@ def write_file(file_path, data):
         file.write(data)
 
 
-@celery.task(bind=True)
+@app.task(bind=True)
 def process_file(job, task):
     extension_to = task['extension_to']
     extension_from = task['extension_from']
