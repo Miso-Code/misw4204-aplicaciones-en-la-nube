@@ -291,8 +291,8 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm
 
 # static files (images, css, javascript, etc.)
-app/static/files/converted/*
-!app/static/files/converted/README.md
-app/static/files/uploaded/*
-!app/static/files/uploaded/README.md
-app/venv/
+static/files/converted/*
+!static/files/converted/README.md
+static/files/uploaded/*
+!static/files/uploaded/README.md
+venv/
