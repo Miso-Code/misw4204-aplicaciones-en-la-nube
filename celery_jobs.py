@@ -23,8 +23,8 @@ def write_file(file_path, data):
 
 @app.task(bind=True)
 def process_file(job, task):
-    extension_to = task['extension_to']
-    extension_from = task['extension_from']
+    extension_to = task['extension_to'].lower()
+    extension_from = task['extension_from'].lower()
 
     file_name = task['id']
 

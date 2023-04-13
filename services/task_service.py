@@ -1,6 +1,7 @@
+import os
 from common.exceptions import CustomException
 from common.exceptions import UserNotAuthorizedException
-from common.utils import save_changes
+from common.utils import delete_changes, save_changes
 from models.task import Task
 from schemas.task_schema import TaskSchema
 
@@ -17,8 +18,9 @@ def get_all_user_tasks(id_user):
 def create_task(id_user, request):
     valid_formats = ['zip', '7z', 'tar.gz', 'tar.bz2']
     try:
-        file = request.files['file']
-        extension_to = request.form['new_format']
+        file = request.files.get('file')
+        extension_to = request.form.get('new_format')
+        
         extension_from = file.filename.split('.')[-1]
         file_name = file.filename.split('.')[0]
 
@@ -41,6 +43,8 @@ def create_task(id_user, request):
         task_schema = TaskSchema()
         return task_schema.dump(task)
     except Exception as e:
+        if isinstance(e, CustomException):
+            raise e
         raise CustomException('Error to create task ' + str(e), 500)
 
 
@@ -60,10 +64,13 @@ def delete_task_by_id(id_user, id_task):
         task = Task.query.filter_by(user_id=id_user, id=id_task).first()
         if task is None:
             raise CustomException('Task not found', 404)
-        task.delete()
+        os.remove(f'./static/files/uploaded/{task.id}.{task.extension_from}')
+        os.remove(f'./static/files/converted/{task.id}.{task.extension_to}')
+        
+        delete_changes(task)
         return {'message': 'Task deleted successfully'}
-    except:
-        raise UserNotAuthorizedException()
+    except Exception as e:
+        raise CustomException('Error to delete task ' + str(e), 500)
 
 
 def update_task_status(id_task, status):
