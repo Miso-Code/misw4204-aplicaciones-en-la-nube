@@ -58,7 +58,7 @@ Por otro lado, se debe tener redis ejecutandose y celery
 > Documentación de como ejecutar `Celery` en [linux](https://docs.celeryproject.org/en/stable/getting-started/first-steps-with-celery.html#starting-the-worker), [windows](https://docs.celeryproject.org/en/stable/getting-started/first-steps-with-celery.html#starting-the-worker) y [mac](https://docs.celeryproject.org/en/stable/getting-started/first-steps-with-celery.html#starting-the-worker)
 
 ```bash
-celery -A app.celery worker --loglevel=info
+celery -A celery_jobs worker --detach
 ```
 
 > Documentación de como ejecutar redis en [linux](https://redis.io/topics/quickstart), [windows](https://redis.io/topics/quickstart) y [mac](https://redis.io/topics/quickstart)
