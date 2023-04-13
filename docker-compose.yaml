@@ -5,6 +5,52 @@ networks:
 
 services:
 
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./apm/prometheus:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - app-network
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - ./apm/grafana/config.ini:/etc/grafana/grafana.ini
+      - ./apm/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/default.yaml
+      - ./apm/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/default.yaml
+      - ./apm/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - app-network
+    depends_on:
+      - prometheus
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  celery-metrics:
+    image: danihodovic/celery-exporter
+    environment:
+      - CE_BROKER_URL=redis://redis:6379/0
+    ports:
+      - "9808:9808"
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
   redis:
     image: redis
     networks:

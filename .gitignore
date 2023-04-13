@@ -2,3 +2,5 @@
 venv
 *.sqlite
 __pycache__
+app/static/files/converted/*
+app/static/files/uploaded/*

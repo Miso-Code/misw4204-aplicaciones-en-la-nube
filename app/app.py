@@ -5,6 +5,7 @@ from flasgger import Swagger
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from prometheus_flask_exporter import PrometheusMetrics
 
 from config import config_app
 from models.db import db
@@ -24,6 +25,7 @@ def import_blueprints(flask_app):
 
 
 app = Flask(__name__)
+PrometheusMetrics(app)
 CORS(app)
 import_blueprints(app)
 Swagger(app)
