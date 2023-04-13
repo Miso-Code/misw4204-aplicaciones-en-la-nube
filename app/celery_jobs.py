@@ -8,7 +8,7 @@ from celery import Celery
 from models.status import Status
 from services.task_service import update_task_status
 
-app = Celery('tasks', broker='redis://localhost:6379/0')
+app = Celery('tasks', broker=os.environ.get('BROKER_URL','redis://localhost:6379/0'))
 
 
 def read_file(file_path):

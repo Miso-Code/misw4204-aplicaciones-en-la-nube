@@ -6,7 +6,7 @@ def config_app(app, env_name):
     db_uri = os.environ.get('DB_URI')
 
     app.config['JWT_SECRET_KEY'] = 'frase-secreta'
-    app.config['DEBUG'] = False
+    app.config['DEBUG'] = True
     app.config['PROPAGATE_EXCEPTIONS'] = True
     app.config['SWAGGER'] = {
         'title': 'Flask API Starter Kit',
