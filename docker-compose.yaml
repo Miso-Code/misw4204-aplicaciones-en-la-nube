@@ -7,12 +7,17 @@ services:
 
   prometheus:
     image: prom/prometheus
+    ports:
+      - "9090:9090"
     volumes:
       - ./apm/prometheus:/etc/prometheus/
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
       - app-network
+    depends_on:
+      - app
+      - celery-metrics
     deploy:
       restart_policy:
         condition: on-failure
@@ -48,6 +53,7 @@ services:
       - "9808:9808"
     depends_on:
       - redis
+      - worker
     networks:
       - app-network
 
