@@ -9,10 +9,11 @@ from prometheus_flask_exporter import PrometheusMetrics
 
 from config import config_app
 from models.db import db
+from models.db import engine
 # ToDo: remove this
 # Just to create the models in the DB
-from models.task import Task  # noqa
 from models.user import User  # noqa
+from models.task import Task  # noqa
 
 
 def import_blueprints(flask_app):
@@ -32,8 +33,8 @@ Swagger(app)
 config_app(app)
 app_context = app.app_context()
 app_context.push()
-db.init_app(app)
-db.create_all()
+# db.init_app(app)
+db.metadata.create_all(engine)
 CORS(app)
 JWTManager(app)
-db.init_app(app)
+# db.init_app(app)

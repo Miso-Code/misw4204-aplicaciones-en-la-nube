@@ -6,10 +6,12 @@ from flask_jwt_extended import create_access_token
 
 from common.exceptions import InvalidParameterException, ResourceExistsException
 from common.utils import save_changes
+from common.decorators import db_session
 from models.user import User
 
 
-def login(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
+@db_session
+def login(session, data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
     username = data.get('username')
     email = data.get('email')
     if not any([username, email]):
@@ -17,7 +19,7 @@ def login(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
 
     user_data = username if username is not None else email
     # get the user data if the username or email matches with user
-    user = User.query.filter(
+    user = session.query(User).filter(
         (User.username == user_data) | (User.email == user_data)
     ).first()
 
@@ -41,7 +43,8 @@ def login(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
         raise InvalidParameterException('Username/Password is incorrect')
 
 
-def signup(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
+@db_session
+def signup(session, data: Dict[str, str]) -> Dict[str, str]:
     username = data.get('username')
     email = data.get('email')
     password1 = data.get('password1')
@@ -55,7 +58,7 @@ def signup(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
 
     user_data = username if username is not None else email
     # get the user data if the username or email matches with user
-    user = User.query.filter(
+    user = session.query(User).filter(
         (User.username == user_data) | (User.email == user_data)
     ).first()
 
@@ -71,10 +74,10 @@ def signup(data: Dict[str, str]) -> Tuple[Dict[str, str], int]:
             email=email,
             password=encrypted_password,
         )
-        save_changes(new_user)
+        save_changes(session, new_user)
         response_object = {
             'status': 'success',
             'message': 'User created.',
             'id': new_user.id,
         }
-        return response_object, 201
+        return response_object

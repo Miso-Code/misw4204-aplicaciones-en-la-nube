@@ -8,8 +8,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from celery_jobs import process_file
 from common.decorators import handle_exceptions
 from services import task_service
+from schemas.task_schema import TaskSchema
 
 blueprint = Blueprint('task_api', __name__, url_prefix='/api')
+
+task_schema = TaskSchema(many=True)
 
 
 @blueprint.route('/tasks', methods=['GET'])
@@ -24,7 +27,8 @@ blueprint = Blueprint('task_api', __name__, url_prefix='/api')
 @handle_exceptions
 def get_all_user_tasks() -> Tuple[Dict[str, Any], int]:
     user_id = get_jwt_identity()
-    return task_service.get_all_user_tasks(user_id), HTTPStatus.OK
+    tasks = task_service.get_all_user_tasks(user_id)
+    return tasks, HTTPStatus.OK
 
 
 @blueprint.route('/tasks', methods=['POST'])

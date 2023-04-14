@@ -34,4 +34,4 @@ def login():
 })
 @handle_exceptions
 def signup():
-    return auth_service.signup(request.get_json())
+    return auth_service.signup(request.get_json()), HTTPStatus.CREATED

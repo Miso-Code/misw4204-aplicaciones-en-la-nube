@@ -1,14 +1,24 @@
+import datetime
+
 from sqlalchemy import Enum as SqlEnum
 
 from .db import db
 from .status import Status
+from sqlalchemy import Column
+from sqlalchemy import event
+from sqlalchemy import Float
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import DateTime
 
 
-class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    extension_from = db.Column(db.String(5))
-    extension_to = db.Column(db.String(7))
-    file_name = db.Column(db.String(50))
-    timestamp = db.Column(db.DateTime(), default=db.func.now())
-    status = db.Column(SqlEnum(Status), default=Status.UPLOADED.value)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+class Task(db):
+    __tablename__ = 'task'
+    id = Column(Integer, primary_key=True)
+    extension_from = Column(String(7))
+    extension_to = Column(String(7))
+    file_name = Column(String(50))
+    timestamp = Column(DateTime(), default=datetime.datetime.now())
+    status = Column(SqlEnum(Status), default=Status.UPLOADED)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)

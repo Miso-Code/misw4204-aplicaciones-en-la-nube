@@ -2,6 +2,7 @@
 #
 from functools import wraps
 from http import HTTPStatus
+from models.db import Session
 
 from common.exceptions import ResourceNotFoundException, \
     InvalidParameterException, \
@@ -38,5 +39,21 @@ def handle_exceptions(func):
                     'message': error,
                 }
                 return response_object, status_code
+
+    return wrapper
+
+
+def db_session(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        session = Session()
+        try:
+            result = func(session, *args, **kwargs)
+            return result
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
     return wrapper

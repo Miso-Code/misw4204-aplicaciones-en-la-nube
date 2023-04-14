@@ -3,10 +3,11 @@ from typing import Any
 from models.db import db
 
 
-def save_changes(data: Any) -> None:
-    db.session.add(data)
-    db.session.commit()
+def save_changes(session, data: Any) -> None:
+    session.add(data)
+    session.commit()
 
-def delete_changes(data: Any) -> None:
-    db.session.delete(data)
-    db.session.commit()
+
+def delete_changes(session, data: Any) -> None:
+    session.delete(data)
+    session.commit()

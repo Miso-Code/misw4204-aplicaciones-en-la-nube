@@ -1,14 +1,37 @@
 import os
 import tarfile
 import zipfile
-
+import os
 import pylzma
 from celery import Celery
 
 from models.status import Status
-from services.task_service import update_task_status
 
-app = Celery('tasks', broker=os.environ.get('BROKER_URL','redis://localhost:6379/0'))
+from models.user import User  # noqa
+from models.task import Task  # noqa
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+app = Celery('tasks', broker=os.environ.get('BROKER_URL', 'redis://localhost:6379/0'))
+
+
+def db_wrapper():
+    db_uri = os.environ.get('DB_URI')
+    engine = create_engine(db_uri)
+    db = declarative_base()
+    db.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    return Session()
+
+
+def update_task_status_wrapper(task_id, status):
+    session = db_wrapper()
+    task = session.query(Task).filter(Task.id == task_id).first()
+    task.status = status
+    session.commit()
+    session.close()
 
 
 def read_file(file_path):
@@ -52,4 +75,4 @@ def process_file(job, task):
         with tarfile.open(output_file_path, 'w:bz2') as tar_file:
             tar_file.add(input_file_path, arcname=os.path.basename(input_file_path))
 
-    update_task_status(task['id'], Status.PROCESSED.value)
+    update_task_status_wrapper(task['id'], Status.PROCESSED.value)
