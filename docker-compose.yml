@@ -7,17 +7,12 @@ services:
 
   prometheus:
     image: prom/prometheus
-    ports:
-      - "9090:9090"
     volumes:
-      - ./apm/prometheus:/etc/prometheus/
+      - ./apm/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
       - app-network
-    depends_on:
-      - app
-      - celery-metrics
     deploy:
       restart_policy:
         condition: on-failure
@@ -44,64 +39,3 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-
-  celery-metrics:
-    image: danihodovic/celery-exporter
-    environment:
-      - CE_BROKER_URL=redis://redis:6379/0
-    ports:
-      - "9808:9808"
-    depends_on:
-      - redis
-      - worker
-    networks:
-      - app-network
-
-  redis:
-    image: redis
-    networks:
-      - app-network
-
-  db:
-    image: postgres
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: app
-    networks:
-      - app-network
-
-  app:
-    build: app
-    command: gunicorn app:app -w 4 --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --log-level info
-    volumes:
-      - ./app:/app
-    environment:
-      - DB_URI=postgresql+psycopg2://user:password@db:5432/app
-      - BROKER_URL=redis://redis:6379/0
-    ports:
-      - "8000:8000"
-    depends_on:
-      - redis
-      - db
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-    networks:
-      - app-network
-
-  worker:
-    build: app
-    command: celery -A celery_jobs worker --loglevel=info --events
-    volumes:
-      - ./app:/app
-    environment:
-      - DB_URI=postgresql+psycopg2://user:password@db:5432/app
-      - BROKER_URL=redis://redis:6379/0
-    depends_on:
-      - redis
-      - db
-    networks:
-      - app-network
