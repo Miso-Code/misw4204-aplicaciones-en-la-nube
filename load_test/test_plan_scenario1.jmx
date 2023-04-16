@@ -44,7 +44,7 @@
           <stringProp name="CounterConfig.end"></stringProp>
           <stringProp name="CounterConfig.incr">1</stringProp>
           <stringProp name="CounterConfig.name">user</stringProp>
-          <stringProp name="CounterConfig.format">USERLT1_00000</stringProp>
+          <stringProp name="CounterConfig.format">USERLT1_${__time()}_00000</stringProp>
           <boolProp name="CounterConfig.per_user">false</boolProp>
         </CounterConfig>
         <hashTree/>

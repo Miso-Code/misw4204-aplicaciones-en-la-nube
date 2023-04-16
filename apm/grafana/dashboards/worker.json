@@ -115,7 +115,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "count(\n  celery_worker_up{\n    job=~\"worker\"\n  } == 1\n)\n",
+          "expr": "count(\n  celery_worker_up{} == 1\n)\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -182,7 +182,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(\n  celery_worker_tasks_active{\n    job=~\"worker\"\n  }\n)\n",
+          "expr": "sum(\n  celery_worker_tasks_active\n)\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -249,7 +249,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(\n  round(\n    increase(\n      celery_task_received_total{\n        job=~\"worker\"\n      }[24h]\n    )\n  )\n)\n",
+          "expr": "sum(\n  celery_task_received_total\n)\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -257,7 +257,7 @@
           "refId": "A"
         }
       ],
-      "title": "Tasks received by workers [24h]",
+      "title": "Tasks received by workers",
       "type": "stat"
     },
     {
@@ -323,7 +323,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(\n  round(\n    increase(\n      celery_task_succeeded_total{\n        job=~\"worker\"\n      }[24h]\n    )\n  )\n)\n/(sum(\n  round(\n    increase(\n      celery_task_succeeded_total{\n        job=~\"worker\"\n      }[24h]\n    )\n  )\n)\n+sum(\n  round(\n    increase(\n      celery_task_failed_total{\n        job=~\"worker\"\n      }[24h]\n    )\n  )\n)\n)\n",
+          "expr": "sum(\n  celery_task_succeeded_total\n)\n/(sum(\n  celery_task_succeeded_total\n)\n+sum(\n  celery_task_failed_total\n)\n)\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -331,7 +331,7 @@
           "refId": "A"
         }
       ],
-      "title": "Tasks Success Rate [24h]",
+      "title": "Tasks Success Rate",
       "type": "stat"
     },
     {
@@ -390,7 +390,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "sum(\n  rate(\n    celery_task_runtime_sum{\n      job=~\"worker\"\n    }[24h]\n  )\n)\n/\nsum(\n  rate(\n    celery_task_runtime_count{\n      job=~\"worker\"\n    }[24h]\n  )\n) > 0\n",
+          "expr": "sum(\n  rate(\n    celery_task_runtime_sum[24h]\n  )\n)\n/\nsum(\n  rate(\n    celery_task_runtime_count[24h]\n  )\n) > 0\n",
           "format": "time_series",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -398,7 +398,7 @@
           "refId": "A"
         }
       ],
-      "title": "Average Runtime for Tasks [24h]",
+      "title": "Average Runtime for Tasks",
       "type": "stat"
     },
     {
@@ -460,13 +460,13 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "(sum(\n  rate(\n    celery_task_runtime_sum{\n      job=~\"worker\"\n    }[24h]\n  )\n)\n/\nsum(\n  rate(\n    celery_task_runtime_count{\n      job=~\"worker\"\n    }[24h]\n  )\n) > 0)\n/ \n(\n  sum(\n  celery_worker_tasks_active{\n    job=~\"worker\"\n  }\n)\n)",
+          "expr": "(sum(\n  rate(\n    celery_task_runtime_sum[24h]\n  )\n)\n/\nsum(\n  rate(\n    celery_task_runtime_count[24h]\n  )\n) > 0)\n/ \n(\n  sum(\n  celery_worker_tasks_active\n  )\n)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Average Awaiting Time [24h]",
+      "title": "Average Awaiting Time",
       "type": "stat"
     },
     {
@@ -1032,7 +1032,7 @@
         "rightSide": true,
         "show": true,
         "sort": "avg",
-        "sortDesc": true,
+        "sortDesc": false,
         "total": false,
         "values": true
       },
@@ -1337,7 +1337,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
