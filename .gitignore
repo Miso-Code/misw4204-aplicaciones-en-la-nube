@@ -4,3 +4,4 @@ venv
 __pycache__
 app/static/files/converted/*
 app/static/files/uploaded/*
+*.rdb
