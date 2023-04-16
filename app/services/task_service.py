@@ -7,6 +7,7 @@ from models.task import Task
 from schemas.task_schema import TaskSchema
 
 task_schema = TaskSchema()
+max_content_length = 20 * 1024 * 1024
 
 
 # get all tasks of the authenticated user
@@ -24,7 +25,12 @@ def create_task(session, id_user, request):
 
     extension_from = file.filename.split('.')[-1]
     file_name = file.filename.split('.')[0]
-
+    if file:
+     if not len(file.read()) <= max_content_length:
+         raise CustomException('The file exceeds the maximum allowed size', 413)
+    else:
+        raise CustomException('No file has been sent', 400)
+    
     if not all([file, extension_to, extension_from, file_name]):
         raise CustomException('All fields are required.', 400)
     if extension_to.lower() not in valid_formats:
