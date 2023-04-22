@@ -8,7 +8,7 @@ services:
   prometheus:
     image: prom/prometheus
     volumes:
-      - ./apm/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../apm/prometheus/prometheus-entrega1.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
@@ -26,10 +26,10 @@ services:
     environment:
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel,grafana-simple-json-datasource
     volumes:
-      - ./apm/grafana/config.ini:/etc/grafana/grafana.ini
-      - ./apm/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/default.yaml
-      - ./apm/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/default.yaml
-      - ./apm/grafana/dashboards:/var/lib/grafana/dashboards
+      - ../apm/grafana/config.ini:/etc/grafana/grafana.ini
+      - ../apm/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/default.yaml
+      - ../apm/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/default.yaml
+      - ../apm/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - app-network
     depends_on:
