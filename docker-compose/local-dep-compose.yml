@@ -70,7 +70,7 @@ services:
       - app-network
 
   app:
-    build: app
+    build: ../app
     command: gunicorn app:app -w 4 --bind 0.0.0.0:8000 --access-logfile - --error-logfile - --log-level info
     volumes:
       - ./app:/app
@@ -91,7 +91,7 @@ services:
       - app-network
 
   worker:
-    build: app
+    build: ../app
     command: celery -A celery_jobs worker --loglevel=info --events
     volumes:
       - ./app:/app

@@ -267,7 +267,7 @@
       },
       "fieldConfig": {
         "defaults": {
-          "decimals": "3",
+          "decimals": 1,
           "links": [],
           "mappings": [],
           "max": 1,
@@ -308,7 +308,7 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "last"
+            "lastNotNull"
           ],
           "fields": "",
           "values": false
