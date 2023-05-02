@@ -74,6 +74,8 @@ pip install -r requirements.txt
 gunicorn app:app
 ```
 
+**Nota:** En el servidor WEB y en el worker se deben tener establecida la variable de entorno `GOOGLE_APPLICATION_CREDENTIALS` con el path a la cuenta de servicio.
+
 ## Documentacion de la API en Postman
 
 En el siguiente link se encuentra la documentación de la API en Postman:

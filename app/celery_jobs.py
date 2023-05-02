@@ -4,6 +4,7 @@ import zipfile
 import os
 import pylzma
 from celery import Celery
+from common.cloud_storage_wrapper import CloudStorageWrapper
 
 from models.status import Status
 
@@ -46,6 +47,8 @@ def write_file(file_path, data):
 
 @app.task(bind=True)
 def process_file(job, task):
+    cs_wrapper = CloudStorageWrapper()
+
     extension_to = task['extension_to'].lower()
     extension_from = task['extension_from'].lower()
 
@@ -55,6 +58,8 @@ def process_file(job, task):
 
     input_file_path = files_path + f'/uploaded/{file_name}.{extension_from}'
     output_file_path = files_path + f'/converted/{file_name}.{extension_to}'
+
+    cs_wrapper.get_file_into_filename(f'files/uploaded/{file_name}.{extension_from}', input_file_path)
 
     if extension_to == 'zip':
         zip_file = zipfile.ZipFile(output_file_path, 'w')
@@ -74,5 +79,8 @@ def process_file(job, task):
     elif extension_to == 'tar.bz2':
         with tarfile.open(output_file_path, 'w:bz2') as tar_file:
             tar_file.add(input_file_path, arcname=os.path.basename(input_file_path))
-
+    cs_wrapper.upload_file_from_path(f'/converted/{file_name}.{extension_to}', output_file_path)
+    # remove local files
+    os.remove(output_file_path)
+    os.remove(input_file_path)
     update_task_status_wrapper(task['id'], Status.PROCESSED.value)
