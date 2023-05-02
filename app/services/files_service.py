@@ -13,7 +13,6 @@ def get_file_by_id(session, id_task, selected='converted'):
     if task is None:
         raise ResourceNotFoundException('Task not found')
     if selected == 'original':
-        # get file from bucket
         file = cs_wrapper.get_file('files/uploaded/' + str(task.id) + '.' + task.extension_from)
         return file
     elif selected == 'converted':

@@ -65,11 +65,9 @@ def delete_task_by_id(session, id_user, id_task):
     task = session.query(Task).filter_by(user_id=id_user, id=id_task).first()
     if task is None:
         raise CustomException('Task not found', 404)
-    # delete file from bucket
+    # delete files from bucket
     cs_wrapper.delete_file('files/uploaded/' + str(task.id) + '.' + task.extension_from)
     cs_wrapper.delete_file('files/converted/' + str(task.id) + '.' + task.extension_to)
-    # os.remove(f'./static/files/uploaded/{task.id}.{task.extension_from}')
-    # os.remove(f'./static/files/converted/{task.id}.{task.extension_to}')
     session.delete(task)
     return {'message': 'Task deleted successfully'}
 
