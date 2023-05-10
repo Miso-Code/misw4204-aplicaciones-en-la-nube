@@ -44,7 +44,6 @@ def get_all_user_tasks() -> Tuple[Dict[str, Any], int]:
 def create_task() -> Tuple[Dict[str, Any], int]:
     user_id = get_jwt_identity()
     task_json = task_service.create_task(user_id, request)
-    process_file.delay(task_json)
     return task_json, HTTPStatus.CREATED
 
 
