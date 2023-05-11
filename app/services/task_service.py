@@ -4,6 +4,7 @@ from common.exceptions import UserNotAuthorizedException
 from common.utils import delete_changes, save_changes
 from common.decorators import db_session
 from common.cloud_storage_wrapper import CloudStorageWrapper
+from common.pub_sub_wrapper import PubSubWrapper
 from models.task import Task
 from schemas.task_schema import TaskSchema
 
@@ -49,7 +50,10 @@ def create_task(session, id_user, request):
     save_changes(session, task)
     # save file into bucket
     cs_wrapper.upload_file('files/uploaded/' + str(task.id) + '.' + extension_from, file)
-    return task_schema.dump(task)
+    task_json = task_schema.dump(task)
+    pub_sub = PubSubWrapper()
+    pub_sub.publish_message(task_json)
+    return task_json
 
 
 @db_session

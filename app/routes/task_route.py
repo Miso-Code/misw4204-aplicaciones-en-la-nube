@@ -5,7 +5,6 @@ from flasgger import swag_from
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from celery_jobs import process_file
 from common.decorators import handle_exceptions
 from services import task_service
 from schemas.task_schema import TaskSchema
@@ -44,7 +43,6 @@ def get_all_user_tasks() -> Tuple[Dict[str, Any], int]:
 def create_task() -> Tuple[Dict[str, Any], int]:
     user_id = get_jwt_identity()
     task_json = task_service.create_task(user_id, request)
-    process_file.delay(task_json)
     return task_json, HTTPStatus.CREATED
 
 
