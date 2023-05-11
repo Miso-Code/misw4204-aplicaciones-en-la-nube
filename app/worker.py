@@ -67,7 +67,7 @@ def callback(message: pubsub_v1.subscriber.message.Message) -> None:
     elif extension_to == 'tar.bz2':
         with tarfile.open(output_file_path, 'w:bz2') as tar_file:
             tar_file.add(input_file_path, arcname=os.path.basename(input_file_path))
-    cs_wrapper.upload_file_from_path(f'/converted/{file_name}.{extension_to}', output_file_path)
+    cs_wrapper.upload_file_from_path(f'files/converted/{file_name}.{extension_to}', output_file_path)
     # remove local files
     os.remove(output_file_path)
     os.remove(input_file_path)
