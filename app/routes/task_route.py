@@ -5,7 +5,6 @@ from flasgger import swag_from
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from celery_jobs import process_file
 from common.decorators import handle_exceptions
 from services import task_service
 from schemas.task_schema import TaskSchema
