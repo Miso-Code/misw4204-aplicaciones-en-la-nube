@@ -28,7 +28,6 @@ def callback(message: pubsub_v1.subscriber.message.Message) -> None:
 
     try:
         ack_future.result()
-        print(f"Ack for message {message.message_id} successful.")
     except sub_exceptions.AcknowledgeError as e:
         print(
             f"Ack for message {message.message_id} failed with error: {e.error_code}"
