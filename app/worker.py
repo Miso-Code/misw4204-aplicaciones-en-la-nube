@@ -25,14 +25,16 @@ subscription_path = subscriber.subscription_path(project_id, subscription_id)
 
 def callback(message: pubsub_v1.subscriber.message.Message) -> None:
     ack_future = message.ack_with_response()
-
     try:
         ack_future.result()
+        convert_file(message)
     except sub_exceptions.AcknowledgeError as e:
         print(
             f"Ack for message {message.message_id} failed with error: {e.error_code}"
         )
 
+
+def convert_file(message):
     task = json.loads(message.data.decode("utf-8"))
 
     cs_wrapper = CloudStorageWrapper()
