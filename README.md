@@ -48,33 +48,40 @@ app
 Para ejecutar la aplicación se debe tener instalado:
 
 - **Python** 3.10+
-- **Redis** 7.0.10
-- **Redis-cli** 7.0.10
 
-> Documentación de como instalar `Redis` en  [linux](https://redis.io/docs/getting-started/installation/install-redis-on-linux/), [windows](https://redis.io/docs/getting-started/installation/install-redis-on-windows/) y [mac](https://redis.io/docs/getting-started/installation/install-redis-on-mac-os/)
-
-Por otro lado, se debe tener redis ejecutandose y celery
-
-> Documentación de como ejecutar `Celery` en [linux](https://docs.celeryproject.org/en/stable/getting-started/first-steps-with-celery.html#starting-the-worker), [windows](https://docs.celeryproject.org/en/stable/getting-started/first-steps-with-celery.html#starting-the-worker) y [mac](https://docs.celeryproject.org/en/stable/getting-started/first-steps-with-celery.html#starting-the-worker)
-
-```bash
-celery -A celery_jobs worker --detach
-```
-
-> Documentación de como ejecutar redis en [linux](https://redis.io/topics/quickstart), [windows](https://redis.io/topics/quickstart) y [mac](https://redis.io/topics/quickstart)
-
-```bash
-redis-server
-```
-
-Posteriormente, se ejecutan los siguientes comandos:
+E instalar los requerimientos necesarios con el comando:
 
 ```bash
 pip install -r requirements.txt
-gunicorn app:app
 ```
 
 **Nota:** En el servidor WEB y en el worker se deben tener establecida la variable de entorno `GOOGLE_APPLICATION_CREDENTIALS` con el path a la cuenta de servicio.
+
+### Ejecutar el worker
+
+Para ejecutar el worker, se debe ejecutar el comando. 
+
+```bash
+python app/worker.py
+```
+
+Se deben tener las siguientes variables de entorno para su funcionamiento:
+
+- `SUBSCRIPTION_ID`: ID de la suscripción en Pub/Sub
+- `PROJECT_ID`: ID del proyecto en GCP
+
+
+### Ejecutar el servidor web
+
+
+```bash
+gunicorn app:app -w 4 --access-logfile - --error-logfile - --log-level info
+```
+
+
+Se deben tener las siguientes variables de entorno para su funcionamiento:
+
+- `DB_URI`: URI de la base de datos Cloud SQL
 
 ## Documentacion de la API en Postman
 
