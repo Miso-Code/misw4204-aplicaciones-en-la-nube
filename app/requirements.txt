@@ -16,3 +16,5 @@ pylzma==0.5.0
 prometheus-flask-exporter==0.22.3
 google-cloud-storage==2.8.0
 google-cloud-pubsub==2.16.1
+google-cloud-secret-manager==2.16.1
+cloud-sql-python-connector[pg8000]==1.2.3

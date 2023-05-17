@@ -11,6 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+from app.common.connections import get_cloudsql_connection
 from common.cloud_storage_wrapper import CloudStorageWrapper
 from models.status import Status
 from models.task import Task  # noqa
@@ -88,8 +89,10 @@ def run_worker():
 
 
 def db_wrapper():
-    db_uri = os.environ.get('DB_URI')
-    engine = create_engine(db_uri)
+    engine = create_engine(
+        "postgresql+pg8000://",
+        creator=get_cloudsql_connection(),
+    )
     db = declarative_base()
     db.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)

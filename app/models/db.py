@@ -1,11 +1,14 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-import os
+from sqlalchemy.orm import sessionmaker
 
-db_uri = os.environ.get('DB_URI')
+from app.common.connections import get_cloudsql_connection
 
-engine = create_engine(db_uri)
+engine = create_engine(
+    "postgresql+pg8000://",
+    creator=get_cloudsql_connection(),
+)
+
 Session = sessionmaker(bind=engine)
 db = declarative_base()
 session = Session()
