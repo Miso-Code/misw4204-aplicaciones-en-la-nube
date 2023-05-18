@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from app.common.connections import get_cloudsql_connection
+from common.connections import get_cloudsql_connection
 from common.cloud_storage_wrapper import CloudStorageWrapper
 from models.status import Status
 from models.task import Task  # noqa

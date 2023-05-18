@@ -6,3 +6,5 @@ env_variables:
   PROJECT_ID: "aplicaciones-en-la-nube-382813"
 automatic_scaling:
   max_instances: 1
+vpc_access_connector:
+  name: "projects/aplicaciones-en-la-nube-382813/locations/us-central1/connectors/db-connector"
