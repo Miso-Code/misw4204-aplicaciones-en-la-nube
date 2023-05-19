@@ -2,7 +2,11 @@ import json
 import os
 import tarfile
 import zipfile
+import io
 from concurrent.futures import TimeoutError
+import base64
+import tempfile
+from pathlib import Path
 
 import pylzma
 from google.cloud import pubsub_v1
@@ -10,6 +14,7 @@ from google.cloud.pubsub_v1.subscriber import exceptions as sub_exceptions
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from flask import Flask, request
 
 from common.connections import get_cloudsql_connection
 from common.cloud_storage_wrapper import CloudStorageWrapper
@@ -20,24 +25,19 @@ from models.user import User  # noqa
 project_id = os.getenv("PROJECT_ID")
 subscription_id = os.getenv("SUBSCRIPTION_ID")
 
-subscriber = pubsub_v1.SubscriberClient()
-subscription_path = subscriber.subscription_path(project_id, subscription_id)
+app = Flask(__name__)
 
 
-def callback(message: pubsub_v1.subscriber.message.Message) -> None:
-    ack_future = message.ack_with_response()
-    try:
-        ack_future.result()
-        convert_file(message)
-    except sub_exceptions.AcknowledgeError as e:
-        print(
-            f"Ack for message {message.message_id} failed with error: {e.error_code}"
-        )
+@app.route("/", methods=["POST"])
+def pub_sub_subscriber():
+    envelope = json.loads(request.data.decode('utf-8'))
+    payload = base64.b64decode(envelope['message']['data'])
+    task = json.loads(payload.decode('utf-8'))
+    convert_file(task)
+    return 'Task converted', 200
 
 
-def convert_file(message):
-    task = json.loads(message.data.decode("utf-8"))
-
+def convert_file(task):
     cs_wrapper = CloudStorageWrapper()
 
     extension_to = task['extension_to'].lower()
@@ -45,53 +45,44 @@ def convert_file(message):
 
     file_name = task['id']
 
-    files_path = os.path.dirname(os.path.abspath(__file__)).replace('\\', '/') + '/static/files'
+    input_file = cs_wrapper.get_file(f'files/uploaded/{file_name}.{extension_from}')
+    output_file = io.BytesIO()  # Create a temporary file in memory
+    with tempfile.NamedTemporaryFile(delete=True) as temp_file:
+        temp_file_path = Path(temp_file.name)
+        temp_file.write(input_file)
 
-    input_file_path = files_path + f'/uploaded/{file_name}.{extension_from}'
-    output_file_path = files_path + f'/converted/{file_name}.{extension_to}'
+        if extension_to == 'zip':
+            with zipfile.ZipFile(output_file, 'w') as zip_file:
+                zip_file.write(temp_file_path, arcname=f'{file_name}.{extension_from}')
 
-    cs_wrapper.get_file_into_filename(f'files/uploaded/{file_name}.{extension_from}', input_file_path)
+        elif extension_to == '7z':
+            compressed_contents = pylzma.compress(temp_file_path.read_bytes())
+            output_file.write(compressed_contents)
 
-    if extension_to == 'zip':
-        zip_file = zipfile.ZipFile(output_file_path, 'w')
-        zip_file.write(input_file_path, arcname=os.path.basename(input_file_path))
-        zip_file.close()
+        elif extension_to == 'tar.gz':
+            with tarfile.open(fileobj=output_file, mode='w:gz') as tar_file:
+                tar_file.add(temp_file_path, arcname=f'{file_name}.{extension_from}')
 
-    elif extension_to == '7z':
-        file_content = read_file(input_file_path)
-        compressed_contents = pylzma.compress(file_content)
-        file_content = compressed_contents
-        write_file(output_file_path, file_content)
+        elif extension_to == 'tar.bz2':
+            with tarfile.open(fileobj=output_file, mode='w:bz2') as tar_file:
+                tar_file.add(temp_file_path, arcname=f'{file_name}.{extension_from}')
 
-    elif extension_to == 'tar.gz':
-        with tarfile.open(output_file_path, 'w:gz') as tar_file:
-            tar_file.add(input_file_path, arcname=os.path.basename(input_file_path))
-
-    elif extension_to == 'tar.bz2':
-        with tarfile.open(output_file_path, 'w:bz2') as tar_file:
-            tar_file.add(input_file_path, arcname=os.path.basename(input_file_path))
-    cs_wrapper.upload_file_from_path(f'files/converted/{file_name}.{extension_to}', output_file_path)
-    # remove local files
-    os.remove(output_file_path)
-    os.remove(input_file_path)
-    update_task_status_wrapper(task['id'], Status.PROCESSED.value)
+    output_file.seek(0)  # Reset the file position to the beginning
+    cs_wrapper.upload_file(f'files/converted/{file_name}.{extension_to}', output_file.getvalue())
+    update_task_status(task['id'], Status.PROCESSED.value)
 
 
-def run_worker():
-    streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
-    print(f"Listening for messages on {subscription_path}..\n")
-    with subscriber:
-        try:
-            streaming_pull_future.result()
-        except TimeoutError:
-            streaming_pull_future.cancel()
-            streaming_pull_future.result()
+def get_file(bytes_io):
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(delete=True) as temp_file:
+        temp_file.write(bytes_io.getvalue())
+    return Path(temp_file.name)
 
 
 def db_wrapper():
     engine = create_engine(
         "postgresql+pg8000://",
-        creator=get_cloudsql_connection(),
+        creator=get_cloudsql_connection,
     )
     db = declarative_base()
     db.metadata.create_all(engine)
@@ -99,7 +90,7 @@ def db_wrapper():
     return Session()
 
 
-def update_task_status_wrapper(task_id, status):
+def update_task_status(task_id, status):
     session = db_wrapper()
     task = session.query(Task).filter(Task.id == task_id).first()
     task.status = status
@@ -107,14 +98,6 @@ def update_task_status_wrapper(task_id, status):
     session.close()
 
 
-def read_file(file_path):
-    with open(file_path, 'rb') as file:
-        return file.read()
-
-
 def write_file(file_path, data):
     with open(file_path, 'wb') as file:
         file.write(data)
-
-
-run_worker()
