@@ -27,10 +27,10 @@ convertirlos a los formatos listados a continuación:
 
 ## Integrantes
 
-- [Brayan Henao](@brayanhenao)
-- [Felipe Cerquera](@pipeCer)
-- [Erik Loaiza](@erikloaiza)
-- [Rodrigo Escobar](@ocralo)
+- [Brayan Henao](https://github.com/brayanhenao)
+- [Felipe Cerquera](https://github.com/pipeCer)
+- [Erik Loaiza](https://github.com/erikloaiza)
+- [Rodrigo Escobar](https://github.com/ocralo)
 
 # Contenido del proyecto
 
