@@ -1,0 +1,12 @@
+runtime: python310
+service: worker
+instance_class: F4
+service_account: entrega-5@aplicaciones-en-la-nube-382813.iam.gserviceaccount.com
+entrypoint: gunicorn worker:app -w 4 --access-logfile - --error-logfile - --log-level info
+env_variables:
+  PROJECT_ID: "aplicaciones-en-la-nube-382813"
+automatic_scaling:
+  max_instances: 1
+  min_instances: 1
+vpc_access_connector:
+  name: "projects/aplicaciones-en-la-nube-382813/locations/us-central1/connectors/db-connector"

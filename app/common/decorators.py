@@ -39,7 +39,6 @@ def handle_exceptions(func):
                     'message': error,
                 }
                 return response_object, status_code
-
     return wrapper
 
 

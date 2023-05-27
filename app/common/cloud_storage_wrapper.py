@@ -22,9 +22,16 @@ class CloudStorageWrapper:
     # Upload a bytes-like file to bucket
     def upload_file(self, file_name, file):
         blob = self.bucket.blob(file_name)
-        file.seek(0)
-        bytes_file = io.BytesIO(file.read())
-        blob.upload_from_file(bytes_file, content_type=file.content_type)
+        if not isinstance(file, bytes):
+            file.seek(0)
+            file_content = file.read()
+        else:
+            file_content = file
+        bytes_file = io.BytesIO(file_content)
+        if hasattr(file, 'content_type'):
+            blob.upload_from_file(bytes_file, content_type=file.content_type)
+        else:
+            blob.upload_from_file(bytes_file, content_type='application/octet-stream')
 
     # Upload a file from path to bucket
     def upload_file_from_path(self, file_name, source_file_name):
